@@ -45,13 +45,6 @@ type Optionals struct {
 }
 
 var optionalsExpected = `{
- "sr": "",
- "omitempty": 0,
- "slr": null,
- "mr": {},
- "fr": 0,
- "br": false,
- "ur": 0,
  "str": {},
  "sto": {}
 }`
