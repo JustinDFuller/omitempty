@@ -110,9 +110,6 @@ func TestRoundtripStringTag(t *testing.T) {
 				NumberStr: "0", // just to satisfy the roundtrip
 			},
 			want: `{
-				"BoolStr": "false",
-				"IntStr": "0",
-				"UintptrStr": "0",
 				"StrStr": "\"\\u0008\\u000c\\n\\r\\t\\\"\\\\\"",
 				"NumberStr": "0"
 			}`,
@@ -599,18 +596,18 @@ func TestNilMarshal(t *testing.T) {
 		{v: map[string]string(nil), want: `null`},
 		{v: []byte(nil), want: `null`},
 		{v: struct{ M string }{"gopher"}, want: `{"M":"gopher"}`},
-		{v: struct{ M Marshaler }{}, want: `{"M":null}`},
+		{v: struct{ M Marshaler }{}, want: `{}`},
 		{v: struct{ M Marshaler }{(*nilJSONMarshaler)(nil)}, want: `{"M":"0zenil0"}`},
 		{v: struct{ M any }{(*nilJSONMarshaler)(nil)}, want: `{"M":null}`},
-		{v: struct{ M encoding.TextMarshaler }{}, want: `{"M":null}`},
+		{v: struct{ M encoding.TextMarshaler }{}, want: `{}`},
 		{v: struct{ M encoding.TextMarshaler }{(*nilTextMarshaler)(nil)}, want: `{"M":"0zenil0"}`},
 		{v: struct{ M any }{(*nilTextMarshaler)(nil)}, want: `{"M":null}`},
 	}
 
-	for _, tt := range testCases {
+	for i, tt := range testCases {
 		out, err := Marshal(tt.v)
 		if err != nil || string(out) != tt.want {
-			t.Errorf("Marshal(%#v) = %#q, %#v, want %#q, nil", tt.v, out, err, tt.want)
+			t.Errorf("test %d - Marshal(%#v) = %#q, %#v, want %#q, nil", i, tt.v, out, err, tt.want)
 			continue
 		}
 	}
@@ -1073,8 +1070,8 @@ func TestMarshalRawMessageValue(t *testing.T) {
 		{&[]any{rawNil}, "[null]", true},
 		{[]any{&rawNil}, "[null]", true},
 		{&[]any{&rawNil}, "[null]", true},
-		{struct{ M RawMessage }{rawNil}, `{"M":null}`, true},
-		{&struct{ M RawMessage }{rawNil}, `{"M":null}`, true},
+		{struct{ M RawMessage }{rawNil}, `{}`, true},
+		{&struct{ M RawMessage }{rawNil}, `{}`, true},
 		{struct{ M *RawMessage }{&rawNil}, `{"M":null}`, true},
 		{&struct{ M *RawMessage }{&rawNil}, `{"M":null}`, true},
 		{map[string]any{"M": rawNil}, `{"M":null}`, true},
@@ -1093,8 +1090,8 @@ func TestMarshalRawMessageValue(t *testing.T) {
 		{&[]any{rawEmpty}, "", false},
 		{[]any{&rawEmpty}, "", false},
 		{&[]any{&rawEmpty}, "", false},
-		{struct{ X RawMessage }{rawEmpty}, "", false},
-		{&struct{ X RawMessage }{rawEmpty}, "", false},
+		{struct{ X RawMessage }{rawEmpty}, "{}", true},
+		{&struct{ X RawMessage }{rawEmpty}, "{}", true},
 		{struct{ X *RawMessage }{&rawEmpty}, "", false},
 		{&struct{ X *RawMessage }{&rawEmpty}, "", false},
 		{map[string]any{"nil": rawEmpty}, "", false},
@@ -1163,12 +1160,12 @@ func TestMarshalPanic(t *testing.T) {
 func TestMarshalUncommonFieldNames(t *testing.T) {
 	v := struct {
 		A0, À, Aβ int
-	}{}
+	}{1, 1, 1}
 	b, err := Marshal(v)
 	if err != nil {
 		t.Fatal("Marshal:", err)
 	}
-	want := `{"A0":0,"À":0,"Aβ":0}`
+	want := `{"A0":1,"À":1,"Aβ":1}`
 	got := string(b)
 	if got != want {
 		t.Fatalf("Marshal: got %s want %s", got, want)

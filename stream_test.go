@@ -133,8 +133,8 @@ func TestEncoderSetEscapeHTML(t *testing.T) {
 		{`"<&>"`, "<&>", `"\u003c\u0026\u003e"`, `"<&>"`},
 		{
 			"tagStruct", tagStruct,
-			`{"\u003c\u003e\u0026#! ":0,"Invalid":0}`,
-			`{"<>&#! ":0,"Invalid":0}`,
+			`{}`,
+			`{}`,
 		},
 		{
 			`"<str>"`, marshalerStruct,
@@ -269,6 +269,7 @@ func TestNullRawMessage(t *testing.T) {
 		Y     float32
 	}
 	const msg = `{"X":0.1,"Id":null,"IdPtr":null,"Y":0.2}`
+	const marshaled = `{"X":0.1,"Id":null,"Y":0.2}`
 	err := Unmarshal([]byte(msg), &data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
@@ -283,8 +284,8 @@ func TestNullRawMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	if string(b) != msg {
-		t.Fatalf("Marshal: have %#q want %#q", b, msg)
+	if string(b) != marshaled {
+		t.Fatalf("Marshal: have %#q want %#q", b, marshaled)
 	}
 }
 
