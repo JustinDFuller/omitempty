@@ -5,6 +5,7 @@
 package json
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -102,7 +103,7 @@ func TestStructTagObjectKey(t *testing.T) {
 			t.Fatalf("Marshal(%#q) failed: %v", tt.raw, err)
 		}
 		var f any
-		err = Unmarshal(b, &f)
+		err = json.Unmarshal(b, &f)
 		if err != nil {
 			t.Fatalf("Unmarshal(%#q) failed: %v", b, err)
 		}

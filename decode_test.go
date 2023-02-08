@@ -1124,7 +1124,7 @@ func TestUnmarshal(t *testing.T) {
 			continue
 		}
 
-		dec := NewDecoder(bytes.NewReader(in))
+		dec := json.NewDecoder(bytes.NewReader(in))
 		if tt.useNumber {
 			dec.UseNumber()
 		}
@@ -1157,7 +1157,7 @@ func TestUnmarshal(t *testing.T) {
 				t.Errorf("#%d: remarshal mismatch:\nhave: %s\nwant: %s", i, enc, in)
 			}
 			vv := reflect.New(reflect.TypeOf(tt.ptr).Elem())
-			dec = NewDecoder(bytes.NewReader(enc))
+			dec = json.NewDecoder(bytes.NewReader(enc))
 			if tt.useNumber {
 				dec.UseNumber()
 			}
@@ -1178,7 +1178,7 @@ func TestUnmarshal(t *testing.T) {
 func TestUnmarshalMarshal(t *testing.T) {
 	initBig()
 	var v any
-	if err := Unmarshal(jsonBig, &v); err != nil {
+	if err := json.Unmarshal(jsonBig, &v); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	b, err := Marshal(v)
@@ -1234,7 +1234,7 @@ func TestLargeByteSlice(t *testing.T) {
 		t.Fatalf("Marshal: %v", err)
 	}
 	var s1 []byte
-	if err := Unmarshal(b, &s1); err != nil {
+	if err := json.Unmarshal(b, &s1); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if !bytes.Equal(s0, s1) {
@@ -1250,7 +1250,7 @@ type Xint struct {
 func TestUnmarshalInterface(t *testing.T) {
 	var xint Xint
 	var i any = &xint
-	if err := Unmarshal([]byte(`{"X":1}`), &i); err != nil {
+	if err := json.Unmarshal([]byte(`{"X":1}`), &i); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if xint.X != 1 {
@@ -1261,7 +1261,7 @@ func TestUnmarshalInterface(t *testing.T) {
 func TestUnmarshalPtrPtr(t *testing.T) {
 	var xint Xint
 	pxint := &xint
-	if err := Unmarshal([]byte(`{"X":1}`), &pxint); err != nil {
+	if err := json.Unmarshal([]byte(`{"X":1}`), &pxint); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if xint.X != 1 {
@@ -1656,7 +1656,7 @@ func TestRefUnmarshal(t *testing.T) {
 	*want.R3 = 13
 
 	var got S
-	if err := Unmarshal([]byte(`{"R0":"ref","R1":"ref","R2":"ref","R3":"ref"}`), &got); err != nil {
+	if err := json.Unmarshal([]byte(`{"R0":"ref","R1":"ref","R2":"ref","R3":"ref"}`), &got); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if !reflect.DeepEqual(got, want) {
@@ -1696,7 +1696,7 @@ func TestNullString(t *testing.T) {
 	s.B = 1
 	s.C = new(int)
 	*s.C = 2
-	err := Unmarshal(data, &s)
+	err := json.Unmarshal(data, &s)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -1741,7 +1741,7 @@ func TestInterfaceSet(t *testing.T) {
 	for _, tt := range interfaceSetTests {
 		b := struct{ X any }{tt.pre}
 		blob := `{"X":` + tt.json + `}`
-		if err := Unmarshal([]byte(blob), &b); err != nil {
+		if err := json.Unmarshal([]byte(blob), &b); err != nil {
 			t.Errorf("Unmarshal %#q: %v", blob, err)
 			continue
 		}
@@ -1859,7 +1859,7 @@ func TestUnmarshalNulls(t *testing.T) {
 
 	before := nulls.Time.String()
 
-	err := Unmarshal(jsonData, &nulls)
+	err := json.Unmarshal(jsonData, &nulls)
 	if err != nil {
 		t.Errorf("Unmarshal of null values failed: %v", err)
 	}
@@ -1936,7 +1936,7 @@ func TestStringKind(t *testing.T) {
 		t.Errorf("Unexpected error marshaling: %v", err)
 	}
 
-	err = Unmarshal(data, &m2)
+	err = json.Unmarshal(data, &m2)
 	if err != nil {
 		t.Errorf("Unexpected error unmarshaling: %v", err)
 	}
@@ -1959,7 +1959,7 @@ func TestByteKind(t *testing.T) {
 		t.Error(err)
 	}
 	var b byteKind
-	err = Unmarshal(data, &b)
+	err = json.Unmarshal(data, &b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1980,7 +1980,7 @@ func TestSliceOfCustomByte(t *testing.T) {
 		t.Fatal(err)
 	}
 	var b []Uint8
-	err = Unmarshal(data, &b)
+	err = json.Unmarshal(data, &b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2003,7 +2003,7 @@ var decodeTypeErrorTests = []struct {
 
 func TestUnmarshalTypeError(t *testing.T) {
 	for _, item := range decodeTypeErrorTests {
-		err := Unmarshal([]byte(item.src), item.dest)
+		err := json.Unmarshal([]byte(item.src), item.dest)
 		if _, ok := err.(*UnmarshalTypeError); !ok {
 			t.Errorf("expected type error for Unmarshal(%q, type %T): got %T",
 				item.src, item.dest, err)
@@ -2025,7 +2025,7 @@ var unmarshalSyntaxTests = []string{
 func TestUnmarshalSyntax(t *testing.T) {
 	var x any
 	for _, src := range unmarshalSyntaxTests {
-		err := Unmarshal([]byte(src), &x)
+		err := json.Unmarshal([]byte(src), &x)
 		if _, ok := err.(*SyntaxError); !ok {
 			t.Errorf("expected syntax error for Unmarshal(%q): got %T", src, err)
 		}
@@ -2047,7 +2047,7 @@ func TestUnmarshalUnexported(t *testing.T) {
 	want := &unexportedFields{Name: "Bob"}
 
 	out := &unexportedFields{}
-	err := Unmarshal([]byte(input), out)
+	err := json.Unmarshal([]byte(input), out)
 	if err != nil {
 		t.Errorf("got error %v, expected nil", err)
 	}
@@ -2074,7 +2074,7 @@ func (t *Time3339) UnmarshalJSON(b []byte) error {
 
 func TestUnmarshalJSONLiteralError(t *testing.T) {
 	var t3 Time3339
-	err := Unmarshal([]byte(`"0000-00-00T00:00:00Z"`), &t3)
+	err := json.Unmarshal([]byte(`"0000-00-00T00:00:00Z"`), &t3)
 	if err == nil {
 		t.Fatalf("expected error; got time %v", time.Time(t3))
 	}
@@ -2087,10 +2087,10 @@ func TestUnmarshalJSONLiteralError(t *testing.T) {
 // "data changing underfoot" error.
 // Issue 3717
 func TestSkipArrayObjects(t *testing.T) {
-	json := `[{}]`
+	in := `[{}]`
 	var dest [0]any
 
-	err := Unmarshal([]byte(json), &dest)
+	err := json.Unmarshal([]byte(in), &dest)
 	if err != nil {
 		t.Errorf("got error %q, want nil", err)
 	}
@@ -2140,7 +2140,7 @@ func TestPrefilled(t *testing.T) {
 
 	for _, tt := range prefillTests {
 		ptrstr := fmt.Sprintf("%v", tt.ptr)
-		err := Unmarshal([]byte(tt.in), tt.ptr) // tt.ptr edited here
+		err := json.Unmarshal([]byte(tt.in), tt.ptr) // tt.ptr edited here
 		if err != nil {
 			t.Errorf("Unmarshal: %v", err)
 		}
@@ -2162,7 +2162,7 @@ var invalidUnmarshalTests = []struct {
 func TestInvalidUnmarshal(t *testing.T) {
 	buf := []byte(`{"a":"1"}`)
 	for _, tt := range invalidUnmarshalTests {
-		err := Unmarshal(buf, tt.v)
+		err := json.Unmarshal(buf, tt.v)
 		if err == nil {
 			t.Errorf("Unmarshal expecting error, got nil")
 			continue
@@ -2186,7 +2186,7 @@ var invalidUnmarshalTextTests = []struct {
 func TestInvalidUnmarshalText(t *testing.T) {
 	buf := []byte(`123`)
 	for _, tt := range invalidUnmarshalTextTests {
-		err := Unmarshal(buf, tt.v)
+		err := json.Unmarshal(buf, tt.v)
 		if err == nil {
 			t.Errorf("Unmarshal expecting error, got nil")
 			continue
@@ -2215,7 +2215,7 @@ func TestInvalidStringOption(t *testing.T) {
 		t.Fatalf("Marshal: %v", err)
 	}
 
-	err = Unmarshal(data, &item)
+	err = json.Unmarshal(data, &item)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -2342,7 +2342,7 @@ func TestUnmarshalEmbeddedUnexported(t *testing.T) {
 	}}
 
 	for i, tt := range tests {
-		err := Unmarshal([]byte(tt.in), tt.ptr)
+		err := json.Unmarshal([]byte(tt.in), tt.ptr)
 		if !equalError(err, tt.err) {
 			t.Errorf("#%d: %v, want %v", i, err, tt.err)
 		}
@@ -2397,7 +2397,7 @@ func TestUnmarshalPanic(t *testing.T) {
 			t.Errorf("panic() = (%T)(%v), want 0xdead", got, got)
 		}
 	}()
-	Unmarshal([]byte("{}"), &unmarshalPanic{})
+	json.Unmarshal([]byte("{}"), &unmarshalPanic{})
 	t.Fatalf("Unmarshal should have panicked")
 }
 
@@ -2408,7 +2408,7 @@ func TestUnmarshalRecursivePointer(t *testing.T) {
 	v = &v
 	data := []byte(`{"a": "b"}`)
 
-	if err := Unmarshal(data, v); err != nil {
+	if err := json.Unmarshal(data, v); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -2424,7 +2424,7 @@ func (m *textUnmarshalerString) UnmarshalText(text []byte) error {
 // See golang.org/issues/34437.
 func TestUnmarshalMapWithTextUnmarshalerStringKey(t *testing.T) {
 	var p map[textUnmarshalerString]string
-	if err := Unmarshal([]byte(`{"FOO": "1"}`), &p); err != nil {
+	if err := json.Unmarshal([]byte(`{"FOO": "1"}`), &p); err != nil {
 		t.Fatalf("Unmarshal unexpected error: %v", err)
 	}
 
@@ -2436,7 +2436,7 @@ func TestUnmarshalMapWithTextUnmarshalerStringKey(t *testing.T) {
 func TestUnmarshalRescanLiteralMangledUnquote(t *testing.T) {
 	// See golang.org/issues/38105.
 	var p map[textUnmarshalerString]string
-	if err := Unmarshal([]byte(`{"开源":"12345开源"}`), &p); err != nil {
+	if err := json.Unmarshal([]byte(`{"开源":"12345开源"}`), &p); err != nil {
 		t.Fatalf("Unmarshal unexpected error: %v", err)
 	}
 	if _, ok := p["开源"]; !ok {
@@ -2454,7 +2454,7 @@ func TestUnmarshalRescanLiteralMangledUnquote(t *testing.T) {
 		t.Fatalf("Marshal unexpected error: %v", err)
 	}
 	var t2 T
-	if err := Unmarshal(b, &t2); err != nil {
+	if err := json.Unmarshal(b, &t2); err != nil {
 		t.Fatalf("Unmarshal unexpected error: %v", err)
 	}
 	if t1 != t2 {
@@ -2469,7 +2469,7 @@ func TestUnmarshalRescanLiteralMangledUnquote(t *testing.T) {
 		t.Fatalf("Marshal unexpected error: %v", err)
 	}
 	var got map[textUnmarshalerString]string
-	if err := Unmarshal(encoded, &got); err != nil {
+	if err := json.Unmarshal(encoded, &got); err != nil {
 		t.Fatalf("Unmarshal unexpected error: %v", err)
 	}
 	want := map[textUnmarshalerString]string{"foo": "", `"`: ""}
@@ -2557,7 +2557,7 @@ func TestUnmarshalMaxDepth(t *testing.T) {
 	for _, tc := range testcases {
 		for _, target := range targets {
 			t.Run(target.name+"-"+tc.name, func(t *testing.T) {
-				err := Unmarshal([]byte(tc.data), target.newValue())
+				err := json.Unmarshal([]byte(tc.data), target.newValue())
 				if !tc.errMaxDepth {
 					if err != nil {
 						t.Errorf("unexpected error: %v", err)

@@ -7,6 +7,7 @@ package json
 import (
 	"bytes"
 	"encoding"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -122,7 +123,7 @@ func TestRoundtripStringTag(t *testing.T) {
 
 			// Verify that it round-trips.
 			var s2 StringTag
-			if err := Unmarshal(got, &s2); err != nil {
+			if err := json.Unmarshal(got, &s2); err != nil {
 				t.Fatalf("Decode: %v", err)
 			}
 			if !reflect.DeepEqual(test.in, s2) {
@@ -774,7 +775,7 @@ func TestEncodePointerString(t *testing.T) {
 		t.Errorf("Marshal = %s, want %s", got, want)
 	}
 	var back stringPointer
-	err = Unmarshal(b, &back)
+	err = json.Unmarshal(b, &back)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}

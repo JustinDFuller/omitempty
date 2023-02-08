@@ -13,6 +13,7 @@ package json
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -58,7 +59,7 @@ func codeInit() {
 
 	codeJSON = data
 
-	if err := Unmarshal(codeJSON, &codeStruct); err != nil {
+	if err := json.Unmarshal(codeJSON, &codeStruct); err != nil {
 		panic("unmarshal code.json: " + err.Error())
 	}
 
@@ -218,7 +219,7 @@ func BenchmarkCodeUnmarshal(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			var r codeResponse
-			if err := Unmarshal(codeJSON, &r); err != nil {
+			if err := json.Unmarshal(codeJSON, &r); err != nil {
 				b.Fatal("Unmarshal:", err)
 			}
 		}
@@ -236,7 +237,7 @@ func BenchmarkCodeUnmarshalReuse(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var r codeResponse
 		for pb.Next() {
-			if err := Unmarshal(codeJSON, &r); err != nil {
+			if err := json.Unmarshal(codeJSON, &r); err != nil {
 				b.Fatal("Unmarshal:", err)
 			}
 		}
@@ -250,7 +251,7 @@ func BenchmarkUnmarshalString(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var s string
 		for pb.Next() {
-			if err := Unmarshal(data, &s); err != nil {
+			if err := json.Unmarshal(data, &s); err != nil {
 				b.Fatal("Unmarshal:", err)
 			}
 		}
@@ -263,7 +264,7 @@ func BenchmarkUnmarshalFloat64(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var f float64
 		for pb.Next() {
-			if err := Unmarshal(data, &f); err != nil {
+			if err := json.Unmarshal(data, &f); err != nil {
 				b.Fatal("Unmarshal:", err)
 			}
 		}
@@ -276,7 +277,7 @@ func BenchmarkUnmarshalInt64(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var x int64
 		for pb.Next() {
-			if err := Unmarshal(data, &x); err != nil {
+			if err := json.Unmarshal(data, &x); err != nil {
 				b.Fatal("Unmarshal:", err)
 			}
 		}
@@ -289,7 +290,7 @@ func BenchmarkIssue10335(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var s struct{}
 		for pb.Next() {
-			if err := Unmarshal(j, &s); err != nil {
+			if err := json.Unmarshal(j, &s); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -318,7 +319,7 @@ func BenchmarkUnmapped(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var s struct{}
 		for pb.Next() {
-			if err := Unmarshal(j, &s); err != nil {
+			if err := json.Unmarshal(j, &s); err != nil {
 				b.Fatal(err)
 			}
 		}

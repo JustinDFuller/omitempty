@@ -6,6 +6,7 @@ package json
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"log"
 	"net"
@@ -245,7 +246,7 @@ func TestRawMessage(t *testing.T) {
 	}
 	const raw = `["\u0056",null]`
 	const msg = `{"X":0.1,"Id":["\u0056",null],"Y":0.2}`
-	err := Unmarshal([]byte(msg), &data)
+	err := json.Unmarshal([]byte(msg), &data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -270,7 +271,7 @@ func TestNullRawMessage(t *testing.T) {
 	}
 	const msg = `{"X":0.1,"Id":null,"IdPtr":null,"Y":0.2}`
 	const marshaled = `{"X":0.1,"Id":null,"Y":0.2}`
-	err := Unmarshal([]byte(msg), &data)
+	err := json.Unmarshal([]byte(msg), &data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
