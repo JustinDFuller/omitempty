@@ -337,7 +337,17 @@ func (e *encodeState) error(err error) {
 	panic(jsonError{err})
 }
 
+type IsEmpty interface {
+	IsEmpty() bool
+}
+
 func isEmptyValue(v reflect.Value) bool {
+	if v.CanInterface() {
+		if i, ok := v.Interface().(IsEmpty); ok {
+			return i.IsEmpty()
+		}
+	}
+
 	switch v.Kind() {
 	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
 		return v.Len() == 0
@@ -354,10 +364,17 @@ func isEmptyValue(v reflect.Value) bool {
 	case reflect.Struct:
 		return isEmptyStruct(v)
 	}
+
 	return false
 }
 
 func isEmptyStruct(v reflect.Value) bool {
+	if v.CanInterface() {
+		if i, ok := v.Interface().(IsEmpty); ok {
+			return i.IsEmpty()
+		}
+	}
+
 	for i, n := 0, v.NumField(); i < n; i++ {
 		if !isEmptyValue(v.Field(i)) {
 			return false
