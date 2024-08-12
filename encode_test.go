@@ -45,10 +45,7 @@ type Optionals struct {
 	Sto struct{} `json:"sto,omitempty"`
 }
 
-var optionalsExpected = `{
- "str": {},
- "sto": {}
-}`
+var optionalsExpected = `{}`
 
 func TestOmitEmpty(t *testing.T) {
 	var o Optionals
