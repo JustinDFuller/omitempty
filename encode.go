@@ -351,8 +351,19 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Float() == 0
 	case reflect.Interface, reflect.Pointer:
 		return v.IsNil()
+	case reflect.Struct:
+		return isEmptyStruct(v)
 	}
 	return false
+}
+
+func isEmptyStruct(v reflect.Value) bool {
+	for i, n := 0, v.NumField(); i < n; i++ {
+		if !isEmptyValue(v.Field(i)) {
+			return false
+		}
+	}
+	return true
 }
 
 func (e *encodeState) reflectValue(v reflect.Value, opts encOpts) {
